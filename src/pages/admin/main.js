@@ -4,7 +4,7 @@ import App from './App.vue'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-require('./firebase.config.js')
+require('../../firebase.config.js')
 
 Vue.config.productionTip = false
 
