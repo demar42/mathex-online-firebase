@@ -1,9 +1,9 @@
 <template>
   <div class="container h-100">
-    <Title />
+    <Title link='admin' link-text='Go to Create'/>
     <div class="row justify-content-center">
       <div class="col col-md-6 p-5">
-        admin stuff
+        <MainContent />
       </div>
     </div>
   </div>
@@ -11,11 +11,13 @@
 
 <script>
 import Title from '@/components/Title'
+import MainContent from '@/components/MainContent'
 
 export default {
-  name: 'admin',
+  name: 'index',
   components: {
-    Title
+    Title,
+    MainContent
   }
 }
 </script>
@@ -23,6 +25,5 @@ export default {
 <style>
 body, html {
   height: 100%;
-  overflow: hidden;
 }
 </style>
