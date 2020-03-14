@@ -14,7 +14,7 @@
         </template>
         <!-- List of Questions from selected Quiz -->
         <template v-if="selected">
-          <button class="btn btn-primary" @click="selected = null">Back</button>
+          <button class="btn btn-primary" @click="commitQuiz(selected.id); selected = null">Back</button>
           <h4 class="my-4">Edit <em>{{selected.name}}</em></h4>
           <div class="list-group">
             <a href="javascript:;" class="list-group-item list-group-item-action"
@@ -26,10 +26,10 @@
               <p v-if='q.answers'>{{q.answers.join(', ')}}</p>
             </a>
           </div>
-          <button class="btn btn-primary mt-2" @click="selected.questions.push('')">Add another question</button>
+          <button class="btn btn-primary mt-2" @click="selected.questions.push({question: '', answers: []})">Add another question</button>
         </template>
         <!-- Modal to edit Questions -->
-        <div class="modal" tabindex="-1" role="dialog" id="editQuestionModal" v-if="selectedQ1">
+        <div class="modal" tabindex="-1" role="dialog" id="editQuestionModal" v-if="selectedQ">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
@@ -42,13 +42,13 @@
                 <h6>Question</h6>
                 <text-editor></text-editor>
                 <h6 class="mt-3">Answers</h6>
-                <input type="text" class="form-control my-2" v-for="(ans, i) in selectedQ1.q.answers" 
-                  :key="i" v-model="selectedQ1.q.answers[i]">
-                <button class="btn btn-primary" @click="selectedQ1.q.answers.push('')">Add another answer</button>
+                <input type="text" class="form-control my-2" v-for="(ans, i) in selectedQ.q.answers" 
+                  :key="i" v-model="selectedQ.q.answers[i]">
+                <button class="btn btn-primary" @click="selectedQ.q.answers.push('')">Add another answer</button>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-primary">Save changes</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss='modal' @click="selectedQ.q.answers = selectedQ.q.answers.filter(Boolean)">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="qEditCancel">Close</button>
               </div>
             </div>
           </div>
@@ -63,6 +63,7 @@ import Title from '@/components/Title'
 import TextEditor from '@/components/TextEditor'
 import jquery from 'jquery'
 import {db} from '../firebase.config.js'
+import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   name: 'admin',
@@ -74,23 +75,36 @@ export default {
     return {
       quizData: [],
       selected: null,
-      selectedQ: null
+      selectedQ: null,
+      selectedQOld: null
     }
   },
   methods: {
     showModal: function() {
+      this.selectedQOld = cloneDeep(this.selectedQ)
       this.$nextTick(() => {jquery('#editQuestionModal').modal('show')}); 
+    },
+    qEditCancel: function() {
+      let index = this.selectedQ.i - 1
+      Object.assign(this.selected.questions[index], this.selectedQOld.q)
+    },
+    commitQuiz: function(id) {
+      // push the quiz to firebase
+      db.collection('quizzes').doc(id).set(this.selected)
     }
   },
   mounted() {
     getQuizDatas(this)
+    console.log(db.collection('quizzes').doc())
   }
 }
 
 function getQuizDatas(vue) {
   db.collection('quizzes').get().then(querySnapshot => {
     querySnapshot.forEach(item => {
-      vue.quizData.push(item.data())
+      let data = item.data()
+      data.id = item.id
+      vue.quizData.push(data)
     })
   })
 }
