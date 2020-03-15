@@ -115,7 +115,7 @@ function getQuizDatas(vue) {
   })
 }
 
-async function createGame(quiz) {
+async function createGame(quiz, vue) {
   // create a new unique ID
   //   get all the current IDs
   let existingIDs = Object.keys((await realtime.ref('/games').once('value')).val())
@@ -128,7 +128,13 @@ async function createGame(quiz) {
   newID = String(newID)
 
   // push the quiz data to the realtime db
-  await realtime.ref('/games/' + newID).set(quiz.questions)
+  await realtime.ref('/games/' + newID).set({
+    questions: quiz.questions,
+    users: []
+  })
+
+  // open link
+  vue.$router.push({path: `/admin/${newID}`})
 }
 </script>
 
