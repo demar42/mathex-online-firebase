@@ -8,7 +8,7 @@
                 <span class="text-muted">A web-app by Daniel Mar</span>
             </div>
             <div class="col-auto mb-2">
-                <router-link class="card-link" :to='link'>{{linkText}}</router-link>
+                <router-link class="card-link" v-if="link" :to='link'>{{linkText}}</router-link>
             </div>
         </div>
     </div>
