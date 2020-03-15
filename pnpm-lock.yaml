@@ -7,6 +7,7 @@ dependencies:
   summernote: 0.8.16
   vue: 2.6.11
   vue-router: 3.1.6
+  vuefire: 2.2.1_firebase@7.10.0
 devDependencies:
   '@vue/cli-plugin-babel': 4.2.3_@vue+cli-service@4.2.3
   '@vue/cli-plugin-eslint': 4.2.3_35fea342ae945b5d2c52ba1a42d962de
@@ -1242,6 +1243,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-FwbuYN9KXBkloLeIR3xRgI8dyOdfK/KzaJlChszNuwmUXD1lHXfLlSeo4n4KrKt2udIK9K9/TzlnyCA3ubM2fA==
+  /@posva/vuefire-core/2.3.0:
+    dev: false
+    resolution:
+      integrity: sha512-QXYYjcekmlKgWtrjla3z6FjcAFgzZD2wrHukz40V3c80gbVSBoDjM/oSvrHCwxzhvTg95abkHgE2yEL0UlHJCQ==
   /@protobufjs/aspromise/1.1.2:
     dev: false
     resolution:
@@ -9640,6 +9645,15 @@ packages:
     dev: false
     resolution:
       integrity: sha512-VfPwgcGABbGAue9+sfrD4PuwFar7gPb1yl1UK1MwXoQPAw0BKSqWfoYCT/ThFrdEVWoI51dBuyCoiNU9bZDZxQ==
+  /vuefire/2.2.1_firebase@7.10.0:
+    dependencies:
+      '@posva/vuefire-core': 2.3.0
+      firebase: 7.10.0
+    dev: false
+    peerDependencies:
+      firebase: '>=4.0.0'
+    resolution:
+      integrity: sha512-Hgb4SJRJJd3+PZk+/YcqK3kjr28nRPHcODSaFRf731bnvdchjN7vDCeovRZNcXqRxLQ46lSyFzmcaZoqv5YdFQ==
   /watchpack/1.6.0:
     dependencies:
       chokidar: 2.1.8
@@ -10048,3 +10062,4 @@ specifiers:
   vue: ^2.6.11
   vue-router: ^3.1.5
   vue-template-compiler: ^2.6.11
+  vuefire: ^2.2.1
