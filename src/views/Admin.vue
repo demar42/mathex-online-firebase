@@ -15,13 +15,14 @@
         <!-- List of Questions from selected Quiz -->
         <template v-if="selected">
           <button class="btn btn-primary" @click="commitQuiz(selected.id); selected = null">Back</button>
+          <button class="btn btn-success float-right" @click="playQuiz(selected)">Play this Quiz</button>
           <h4 class="my-4">Edit <em>{{selected.name}}</em></h4>
           <div class="list-group">
             <a href="javascript:;" class="list-group-item list-group-item-action"
                 v-for="(q,i) in selected.questions" :key="i" 
                 @click="selectedQ = {q: q, i:i+1}; showModal()">
               <h5>Question {{i+1}}</h5>
-              <span class=" h6 text-muted">Question:</span><p>{{q.question}}</p>
+              <span class=" h6 text-muted">Question:</span><p v-html="q.question"></p>
               <span class="h6 text-muted mt-2">Answers:</span>
               <p v-if='q.answers'>{{q.answers.join(', ')}}</p>
             </a>
@@ -40,7 +41,7 @@
               </div>
               <div class="modal-body">
                 <h6>Question</h6>
-                <text-editor></text-editor>
+                <text-editor v-model="selectedQ.q.question"/>
                 <h6 class="mt-3">Answers</h6>
                 <input type="text" class="form-control my-2" v-for="(ans, i) in selectedQ.q.answers" 
                   :key="i" v-model="selectedQ.q.answers[i]">
@@ -62,7 +63,7 @@
 import Title from '@/components/Title'
 import TextEditor from '@/components/TextEditor'
 import jquery from 'jquery'
-import {db} from '../firebase.config.js'
+import {db, realtime} from '../firebase.config.js'
 import cloneDeep from 'lodash/cloneDeep'
 
 export default {
@@ -91,11 +92,16 @@ export default {
     commitQuiz: function(id) {
       // push the quiz to firebase
       db.collection('quizzes').doc(id).set(this.selected)
+    },
+    playQuiz: function(quiz) {
+      // commit the quiz
+      this.commitQuiz(quiz.id)
+      // transfer the quiz into the realtime db
+      createGame(quiz, this)
     }
   },
   mounted() {
     getQuizDatas(this)
-    console.log(db.collection('quizzes').doc())
   }
 }
 
@@ -107,6 +113,22 @@ function getQuizDatas(vue) {
       vue.quizData.push(data)
     })
   })
+}
+
+async function createGame(quiz) {
+  // create a new unique ID
+  //   get all the current IDs
+  let existingIDs = Object.keys((await realtime.ref('/games').once('value')).val())
+  //   create an ID and keep trying until a new one is found (between 99999 and 999999)
+  let newID = Math.floor((Math.random() * 900000) + 99999)
+  while (existingIDs.includes(String(newID))) {
+    newID = Math.floor((Math.random() * 900000) + 99999)
+  }
+  //   convert it to a string
+  newID = String(newID)
+
+  // push the quiz data to the realtime db
+  await realtime.ref('/games/' + newID).set(quiz.questions)
 }
 </script>
 

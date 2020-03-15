@@ -1,5 +1,5 @@
 <template>
-    <div id="summernote"></div>
+    <div id="summernote">{{value}}</div>
 </template>
 
 <script>
@@ -8,8 +8,10 @@ import 'summernote/dist/summernote-bs4.js'
 import 'summernote/dist/summernote-bs4.css'
 
 export default {
+    props: ['value'],
     name: 'TextEditor',
     mounted() {
+        var vue = this
         jquery('#summernote').summernote({
             toolbar: [
                 ['style', ['bold', 'italic', 'underline', 'clear']],
@@ -19,8 +21,8 @@ export default {
                 ['insert', ['picture', 'table']]
             ],
             callbacks: {
-                onChange: function(contents, $editable) {
-                    console.log(contents, $editable)
+                onChange: function(contents) {
+                    vue.$emit('input', contents)
                 }
             }
         })

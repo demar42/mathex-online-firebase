@@ -13,7 +13,7 @@ const firebaseConfig = {
 }
 firebase.initializeApp(firebaseConfig)
 
-const database = firebase.database();
+const realtime = firebase.database();
 const db = firebase.firestore();
 
-export {db, database}
+export {db, realtime}
