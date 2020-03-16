@@ -13,8 +13,15 @@
                 <div class="row">
                     <h3>LEADERBOARD</h3>
                 </div>
-                <div class="row" v-for="(player, k) in players" :key="k">
-                    {{player.name}} - {{player.score}}
+                <div class="row row-cols-5">
+                    <div class="col" v-for="(player, k) in players" :key="k">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">{{player.name}}</h5>
+                                <p class="display-4">{{player.score}}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
