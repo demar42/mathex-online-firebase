@@ -1,6 +1,6 @@
 <template>
   <div class="container h-100">
-    <Title link='admin' link-text='Go to Create'/>
+    <Title/>
     <div class="row justify-content-center">
       <div class="col col-md-6 p-5">
         <MainContent />
