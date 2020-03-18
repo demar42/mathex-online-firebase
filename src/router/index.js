@@ -11,6 +11,11 @@ const routes = [
     component: Index
   },
   {
+    path: '/game',
+    name: 'Play',
+    component: () => import('../views/Play.vue')
+  },
+  {
     path: '/admin',
     name: 'Admin',
     // route level code-splitting
@@ -20,7 +25,7 @@ const routes = [
   },
   {
     path: '/admin/:gameID',
-    name: 'Play',
+    name: 'Play - Admin',
     component: () => import('../views/Game.vue')
   }
 ]

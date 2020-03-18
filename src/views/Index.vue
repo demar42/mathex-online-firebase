@@ -3,7 +3,7 @@
     <Title/>
     <div class="row justify-content-center">
       <div class="col col-md-6 p-5">
-        <MainContent />
+        <Login v-on:data="arg => {$cookie.set('gameinfo', JSON.stringify(arg)); $router.push('/game')}"/>
       </div>
     </div>
   </div>
@@ -11,13 +11,13 @@
 
 <script>
 import Title from '@/components/Title'
-import MainContent from '@/components/MainContent'
+import Login from '@/components/Login'
 
 export default {
   name: 'index',
   components: {
     Title,
-    MainContent
+    Login
   }
 }
 </script>
