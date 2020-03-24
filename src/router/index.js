@@ -4,6 +4,16 @@ import Index from '../views/Index.vue'
 
 Vue.use(VueRouter)
 
+// VERY BASIC ADMIN PAGE PROTECTION
+function guard(a, b, next) {
+  if (Vue.cookie.get('adminAllowed')|| prompt('Please enter the password to view this page:') === 'admin1234') {
+    next()
+    Vue.cookie.set('adminAllowed', true)
+  } else {
+    next('/')
+  }
+}
+
 const routes = [
   {
     path: '/',
@@ -16,6 +26,7 @@ const routes = [
     component: () => import('../views/Play.vue')
   },
   {
+    beforeEnter: guard,
     path: '/admin',
     name: 'Admin',
     // route level code-splitting
@@ -24,6 +35,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/Admin.vue')
   },
   {
+    beforeEnter: guard,
     path: '/admin/:gameID',
     name: 'Play - Admin',
     component: () => import('../views/Game.vue')
@@ -31,7 +43,8 @@ const routes = [
 ]
 
 const router = new VueRouter({
-  routes
+  routes,
+  mode: 'history'
 })
 
 export default router
