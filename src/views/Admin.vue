@@ -11,10 +11,12 @@
               v-on:click="selected = quiz"
               v-for="quiz in quizData" :key="quiz.name">{{quiz.name}}</a>
           </div>
+          <button class="btn btn-primary mt-2" @click="addQuiz">Add another quiz</button>
         </template>
         <!-- List of Questions from selected Quiz -->
         <template v-if="selected">
-          <button class="btn btn-primary" @click="commitQuiz(selected.id); selected = null">Back</button>
+          <button class="btn btn-primary mr-2" @click="selected = null">Exit</button>
+          <button class="btn btn-success" @click="commitQuiz(selected.id)">Save</button>
           <button class="btn btn-success float-right" @click="playQuiz(selected)">Play this Quiz</button>
           <h4 class="my-4">Edit <em>{{selected.name}}</em></h4>
           <div class="list-group">
@@ -65,6 +67,7 @@ import TextEditor from '@/components/TextEditor'
 import jquery from 'jquery'
 import {db, realtime} from '../firebase.config.js'
 import cloneDeep from 'lodash/cloneDeep'
+import dateFormat from 'dateformat'
 
 export default {
   name: 'admin',
@@ -81,6 +84,19 @@ export default {
     }
   },
   methods: {
+    addQuiz: function() {
+      let now = new Date()
+      let newRef = db.collection('quizzes').doc()
+      let newQuiz = {
+        id: newRef.id,
+        name: dateFormat(now, 'dd/mm/yy h:MM:ss'),
+        questions: []
+      }
+      // push to firebase
+      newRef.set(newQuiz)
+      // push to local array
+      this.quizData.push(newQuiz)
+    },
     showModal: function() {
       this.selectedQOld = cloneDeep(this.selectedQ)
       this.$nextTick(() => {jquery('#editQuestionModal').modal('show')}); 
@@ -106,7 +122,7 @@ export default {
 }
 
 function getQuizDatas(vue) {
-  db.collection('quizzes').get().then(querySnapshot => {
+  db.collection('quizzes').orderBy('name').get().then(querySnapshot => {
     querySnapshot.forEach(item => {
       let data = item.data()
       data.id = item.id
