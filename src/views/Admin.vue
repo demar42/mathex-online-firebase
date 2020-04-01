@@ -3,6 +3,7 @@
     <Title link='/' link-text='Go to Play'/>
     <div class="row justify-content-center">
       <div class="col col-md-8 p-5">
+
         <!-- Table to select a quiz to edit -->
         <template v-if='!selected'>
           <h4>Select a Quiz</h4>
@@ -11,18 +12,20 @@
               v-on:click="selected = quiz"
               v-for="quiz in quizData" :key="quiz.name">{{quiz.name}}</a>
           </div>
-          <button class="btn btn-primary mt-2" @click="addQuiz">Add another quiz</button>
+          <button class="btn btn-primary mt-2" @click="quizName = ''; renaming = false; showModal('#nameQuizModal')">Add another quiz</button>
         </template>
+
         <!-- List of Questions from selected Quiz -->
         <template v-if="selected">
-          <button class="btn btn-primary mr-2" @click="selected = null">Exit</button>
-          <button class="btn btn-success" @click="commitQuiz(selected.id)">Save</button>
+          <button class="btn btn-primary mr-2" @click="selected = null">&lt; Back</button>
+          <dropdown 
+            :actions="[['Rename', () => {quizName = this.selected.name; renaming = true; showModal('#nameQuizModal')}], ['Delete', deleteQuiz]]" />
           <button class="btn btn-success float-right" @click="playQuiz(selected)">Play this Quiz</button>
           <h4 class="my-4">Edit <em>{{selected.name}}</em></h4>
           <div class="list-group">
             <a href="javascript:;" class="list-group-item list-group-item-action"
                 v-for="(q,i) in selected.questions" :key="i" 
-                @click="selectedQ = {q: q, i:i+1}; showModal()">
+                @click="selectedQ = {q: q, i:i+1}; showModal('#editQuestionModal')">
               <h5>Question {{i+1}}</h5>
               <span class=" h6 text-muted">Question:</span><p v-html="q.question"></p>
               <span class="h6 text-muted mt-2">Answers:</span>
@@ -31,6 +34,7 @@
           </div>
           <button class="btn btn-primary mt-2" @click="selected.questions.push({question: '', answers: []})">Add another question</button>
         </template>
+
         <!-- Modal to edit Questions -->
         <div class="modal" tabindex="-1" role="dialog" id="editQuestionModal" v-if="selectedQ">
           <div class="modal-dialog" role="document">
@@ -50,12 +54,35 @@
                 <button class="btn btn-primary" @click="selectedQ.q.answers.push('')">Add another answer</button>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss='modal' @click="selectedQ.q.answers = selectedQ.q.answers.filter(Boolean)">Save changes</button>
+                <button type="button" class="btn btn-primary" data-dismiss='modal' @click="selectedQ.q.answers = selectedQ.q.answers.filter(Boolean); commitQuiz()">Save changes</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="qEditCancel">Close</button>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Modal to name/rename quiz -->
+        <div class="modal" id="nameQuizModal" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Name Quiz</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <h6>Enter a name for the quiz</h6>
+                <input type="text" class="form-control my-2" v-model="quizName">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss='modal' @click="renaming ? renameQuiz() : addQuiz()">{{renaming ? "Rename" : "Create"}}</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -64,33 +91,36 @@
 <script>
 import Title from '@/components/Title'
 import TextEditor from '@/components/TextEditor'
+import Dropdown from '@/components/Dropdown'
+
 import jquery from 'jquery'
 
 import {db, realtime} from '../firebase.config.js'
 import cloneDeep from 'lodash/cloneDeep'
-import dateFormat from 'dateformat'
 
 export default {
   name: 'admin',
   components: {
     Title,
-    TextEditor
+    TextEditor,
+    Dropdown
   },
   data: function() {
     return {
       quizData: [],
       selected: null,
       selectedQ: null,
-      selectedQOld: null
+      selectedQOld: null,
+      quizName: '',
+      renaming: false
     }
   },
   methods: {
     addQuiz: function() {
-      let now = new Date()
       let newRef = db.collection('quizzes').doc()
       let newQuiz = {
         id: newRef.id,
-        name: dateFormat(now, 'dd/mm/yy h:MM:ss'),
+        name: this.quizName,
         questions: []
       }
       // push to firebase
@@ -98,17 +128,27 @@ export default {
       // push to local array
       this.quizData.push(newQuiz)
     },
-    showModal: function() {
-      this.selectedQOld = cloneDeep(this.selectedQ)
-      this.$nextTick(() => {jquery('#editQuestionModal').modal('show')}); 
+    renameQuiz: function() {
+      this.selected.name = this.quizName
+      this.commitQuiz()
+    },
+    deleteQuiz: function() {
+      if(confirm('Are you sure you want to delete?')) {
+        db.collection('quizzes').doc(this.selected.id).delete().then(getQuizDatas(this))
+        this.selected = null
+      }
+    },
+    showModal: function(id) {
+      if (id === '#editQuestionModal') this.selectedQOld = cloneDeep(this.selectedQ)
+      this.$nextTick(() => {jquery(id).modal('show')}); 
     },
     qEditCancel: function() {
       let index = this.selectedQ.i - 1
       Object.assign(this.selected.questions[index], this.selectedQOld.q)
     },
-    commitQuiz: function(id) {
+    commitQuiz: function() {
       // push the quiz to firebase
-      db.collection('quizzes').doc(id).set(this.selected)
+      db.collection('quizzes').doc(this.selected.id).set(this.selected)
     },
     playQuiz: function(quiz) {
       // commit the quiz
@@ -124,6 +164,7 @@ export default {
 }
 
 function getQuizDatas(vue) {
+  vue.quizData = []
   db.collection('quizzes').orderBy('name').get().then(querySnapshot => {
     querySnapshot.forEach(item => {
       let data = item.data()
