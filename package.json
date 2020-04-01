@@ -14,9 +14,9 @@
     "firebase": "^7.10.0",
     "jquery": "^3.4.1",
     "popper.js": "^1.16.1",
-    "summernote": "^0.8.16",
     "vue": "^2.6.11",
     "vue-cookie": "^1.1.4",
+    "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.1.5",
     "vuefire": "^2.2.1"
   },

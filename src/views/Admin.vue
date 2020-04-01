@@ -65,6 +65,7 @@
 import Title from '@/components/Title'
 import TextEditor from '@/components/TextEditor'
 import jquery from 'jquery'
+
 import {db, realtime} from '../firebase.config.js'
 import cloneDeep from 'lodash/cloneDeep'
 import dateFormat from 'dateformat'

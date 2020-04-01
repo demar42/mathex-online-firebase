@@ -1,31 +1,52 @@
 <template>
-    <div id="summernote">{{value}}</div>
+    <quill-editor v-model="text" :options="quillOptions"/>
 </template>
 
 <script>
-import jquery from 'jquery'
-import 'summernote/dist/summernote-bs4.js'
-import 'summernote/dist/summernote-bs4.css'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import {quillEditor} from 'vue-quill-editor'
 
 export default {
     props: ['value'],
     name: 'TextEditor',
-    mounted() {
-        var vue = this
-        jquery('#summernote').summernote({
-            toolbar: [
-                ['style', ['bold', 'italic', 'underline', 'clear']],
-                ['font', ['strikethrough', 'superscript', 'subscript']],
-                ['fontsize', ['fontsize']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['insert', ['picture', 'table']]
-            ],
-            callbacks: {
-                onChange: function(contents) {
-                    vue.$emit('input', contents)
-                }
+    components: {
+        quillEditor
+    },
+    data() {
+        return {
+            text: '',
+            quillOptions: {
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        [{ 'script': 'sub' }, { 'script': 'super' }],
+                        [{ 'align': [] }],
+                        ['clean'],
+                        ['image']
+                    ]
+                },
             }
-        })
+        }
+    },
+    watch: {
+        value: {
+            handler: function() {
+                this.text = this.value
+            },
+            immediate: true
+        },
+        text() {
+            this.$emit('input', this.text)
+        }
     }
 }
 </script>
+
+<style>
+.ql-container.ql-snow {
+    font-family: inherit;
+    font-size: 1rem;
+}
+</style>
