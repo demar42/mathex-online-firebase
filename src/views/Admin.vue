@@ -118,6 +118,7 @@ export default {
   },
   mounted() {
     getQuizDatas(this)
+    clearOldQuizzes()
   }
 }
 
@@ -128,6 +129,20 @@ function getQuizDatas(vue) {
       data.id = item.id
       vue.quizData.push(data)
     })
+  })
+}
+
+function clearOldQuizzes() {
+  // Delete any quizzes that have a timestamp that is older than 10 days ago
+  realtime.ref('/games').once('value').then(snapshot => {
+    let games = snapshot.val()
+    let expiry = Math.floor((new Date()).getTime() / 1000) - 10 * 24 * 60 * 60
+    for (const key of Object.keys(games)) {
+      if (games[key].created < expiry) {
+        // Delete it
+        realtime.ref('/games/' + key).set(null)
+      }
+    }
   })
 }
 
@@ -146,7 +161,8 @@ async function createGame(quiz, vue) {
   // push the quiz data to the realtime db
   await realtime.ref('/games/' + newID).set({
     questions: quiz.questions,
-    users: []
+    users: [],
+    created: Math.round((new Date).getTime() / 1000) // mark creation time
   })
 
   // open link
