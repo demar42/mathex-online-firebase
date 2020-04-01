@@ -7,7 +7,7 @@
         </template>
         <template v-if="pin_provided">
             <label for="username">Game {{pin}}</label>
-            <input id="username" type="text" class="form-control" placeholder="Enter your username" 
+            <input id="username" type="text" class="form-control" placeholder="Enter your name" 
                 v-model="username" v-on:keyup.enter="submitUsername"/>
         </template>
     </div>
