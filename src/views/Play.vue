@@ -78,12 +78,11 @@ export default {
                         // check to make sure we haven't reached the end
                         if (this.user.cur_question + 1 === this.questions.length) {
                             this.finished = true
-                        } else {
-                            realtime.refFromURL(this.gameinfo.userRef).update({
-                                score: this.user.score + 5,
-                                cur_question: this.user.cur_question + 1,
-                            })
                         }
+                        realtime.refFromURL(this.gameinfo.userRef).update({
+                            score: this.user.score + 5,
+                            cur_question: this.user.cur_question + 1,
+                        })
                     }
                 }, 1000)
             }, 5000)
