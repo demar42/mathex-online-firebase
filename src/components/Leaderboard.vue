@@ -1,119 +1,112 @@
 <template>
-    <svg id="leaderboard-d3"></svg>
+    <div class="card h-100">
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title">Leaderboard</h5>
+            <div class="card-body d-flex flex-column">
+                <div class="row">
+                    <div class="col-3 px-1 t-header">Pos</div>
+                    <div class="col-6 px-1 t-header">Name</div>
+                    <div class="col-3 pl-1 t-header text-right">Score</div>
+                </div>
+                <div class="row flex-grow-1">
+                    <div class="col h-100" style="position: relative; overflow: auto" id="l-scroll">
+                        <!-- Create a row for every piece of data. Use rank() to determine rank -->
+                        <div v-for="score in this.info" :key="score['.key']" :style="determineStyle(score)"
+                            class="row t-row">
+                            <div class="col-3">{{rank(score)}}</div>
+                            <div class="col-6 px-1">{{score.name}}</div>
+                            <div class="col-3 text-right">{{score.score}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
-import * as d3 from 'd3'
 
 export default {
     name: 'Leaderboard',
-    props: ['info'],
+    props: ['info', 'user'],
     data() {
         return {
-            chart: null
+            sortedItems: [],
+            RemPerRow: 2.5,
         }
     },
     watch: {
         info: {
-            handler: function(val) {this.dataChanged(val)},
-            deep: true
+            handler: function(val) {
+                this.sortedItems = val.slice().sort(function(a, b) {return b.score - a.score})
+            },
+            immediate: true
+        },
+        user: {
+            handler: function() {
+                this.$nextTick(function() {
+                    // Set the scroll position to look at the user
+                    // This will attempt to center scroll onto the user
+                    // Since we set it from the top, it needs to be "top" of user minus height of view
+                    let rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
+                    let userTop = this.RemPerRow * (this.rank(this.user) - 1) // use the same formula as above
+                    userTop *= rem // it was measured in rem above, so convert to px
+                    let view = document.getElementById('l-scroll')
+                    let viewHeight = view.offsetHeight
+                    view.scrollTop = userTop - viewHeight / 2
+                })
+            },
+            immediate: true
         }
     },
-    mounted() {
-        // Fire the data changed thing
-        this.newChart(this.info)
-        window.addEventListener('resize', () => this.newChart(this.info))
-    },
     methods: {
-        newChart(val) {
-            let svg = d3.select('#leaderboard-d3')
-
-            const padding = 20
-            const height = svg.node().getBoundingClientRect().height - padding
-            const width = svg.node().getBoundingClientRect().width - padding
-
-            if (this.chart) this.chart.remove()
-
-            this.chart = svg.append('g')
-                .attr('height', height)
-                .attr('width', width)
-                .attr('transform', `translate(${padding}, ${padding})`)
-
-            this.dataChanged(val)
+        rank(val) {
+            for (let i = 0; i < this.sortedItems.length; i++) {
+                // if the keys are the same, return index + 1, so its a human-readable position
+                if (val['.key'] === this.sortedItems[i]['.key']) return i + 1
+            }
         },
-        dataChanged(val) {
-            let svg = d3.select('#leaderboard-d3')
-
-            val = val.slice().reverse()
-
-            const padding = 20
-            const height = svg.node().getBoundingClientRect().height - padding
-            const width = svg.node().getBoundingClientRect().width - padding
-
-            const barTotalHeight = height / val.length
-            const barPadding = 5
-            const barHeight = barTotalHeight - barPadding
-
-            let xFunction = d3.scaleLinear()
-                .range([0, width - 2 * padding])
-                // data is min of 15, otherwise 5 more than highest score
-                .domain([0, d3.max([15, d3.max(val, val => {return val.score}) + 5])])
-
-            // bars
-            let selection = this.chart.selectAll('g')
-                .data(val)
-
-            let newBar = selection.enter()
-                .remove('g')
-                .append('g')
-                .attr('transform', function(d, i){
-                    return `translate(0, ${barTotalHeight * i + barPadding})`;
-                })
-
-            newBar.append('rect')
-                .attr('width', d => {return xFunction(d.score)})
-                .attr('height', barHeight)
-                .style('fill', 'var(--blue)')
-
-            newBar.append('text')
-                .attr('y', barHeight / 2)
-                .style('fill', 'black')
-                .attr('dy', '.35em')
-                .text(function(d){
-                    return d.name;
-                })
-                .attr('x', function(d){
-                    return xFunction(d.score) + 10;
-                })
-
-            selection.select('g')
-                .attr('transform', function(d, i){
-                    return `translate(0, ${barTotalHeight * i + barPadding})`;
-                })
-
-            selection.select('g text')
-                .attr('x', function(d){
-                    return xFunction(d.score) + 10;
-                })
-
-            // axis
-            let xAxis = d3.axisTop(xFunction)
-                .ticks(d3.max([15, d3.max(val, val => {return val.score}) + 5]) / 5)
-                .tickSizeOuter(0)
-                .tickSizeInner(-height)
-            
-            let axis = this.chart.append('g')
-                .call(xAxis)
-                
-            axis.selectAll('.tick:not(:first-of-type) line').remove()
+        determineStyle(val) {
+            let style = ''
+            let rank = this.rank(val)
+            style += `top: ${this.RemPerRow * (rank - 1)}rem;`
+            // If this is the data of the user, highlight it green
+            if (this.user['.key'] === val['.key']) {
+                style += 'color: var(--green);'
+                console.log()
+            }
+            switch (rank) {
+                case 1:
+                    style += 'background-color: #F4C127;'
+                    break;
+                case 2:
+                    style += 'background-color: #BDC1BE;'
+                    break;
+                case 3:
+                    style += 'background-color: #DB9B41;'
+                    break;
+            }
+            return style
         }
     }
 }
 </script>
 
-<style>
-svg {
-    width: 100%;
-    height: 100%;
+<style scoped>
+.t-header {
+    font-weight: bold;
+}
+
+.t-row {
+    position: absolute;
+    left: 1.25rem;
+    right: 1.25rem;
+    transition: top 1s;
+}
+
+.t-header, .t-row {
+    border-top: 1px solid #dee2e6;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
 </style>

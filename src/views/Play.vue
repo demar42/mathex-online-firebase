@@ -6,9 +6,9 @@
             </div>
             <div class="row justify-content-left py-4 flex-grow-1" v-if="dataReady">
                 <!-- Questions column -->
-                <div class="col col-lg-4">
+                <div class="col col-lg-8 px-5">
                     <div class="row justify-content-center">
-                        <div class="col-auto" v-if="finished">
+                        <div class="col-" v-if="finished">
                             <span class="text-success">
                                 <span class="display-4">Congratulations!</span> <br>
                                 You have completed all the questions!
@@ -39,7 +39,7 @@
     
                 <!-- Leaderboard column -->
                 <div class="col d-none d-lg-block">
-                    <leaderboard :info="scores" />
+                    <leaderboard :info="scores" :user="user"/>
                 </div>
             </div>
         </div>
@@ -126,7 +126,7 @@ export default {
                 this.$rtdbBind('started', realtime.ref(`/games/${this.gameinfo.pin}/started`)),
                 this.$rtdbBind('questions', realtime.ref(`/games/${this.gameinfo.pin}/questions`)),
                 this.$rtdbBind('user', realtime.refFromURL(this.gameinfo.userRef)),
-                this.$rtdbBind('scores', realtime.ref(`/games/${this.gameinfo.pin}/players`).orderByChild('score'))
+                this.$rtdbBind('scores', realtime.ref(`/games/${this.gameinfo.pin}/players`))
             ]).then(function dataReady() {
                 vue.finished = vue.user.cur_question >= vue.questions.length
                 vue.dataReady = true
