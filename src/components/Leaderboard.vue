@@ -1,7 +1,9 @@
 <template>
     <div class="card h-100">
         <div class="card-body d-flex flex-column">
-            <h5 class="card-title">Leaderboard</h5>
+            <h5 class="card-title">Leaderboard 
+                {{$route.params.gameID ? ` - Game ${$route.params.gameID}` : ''}}
+            </h5>
             <div class="card-body d-flex flex-column">
                 <div class="row">
                     <div class="col-3 px-1 t-header">Pos</div>

@@ -14,19 +14,9 @@
                 <div v-if='!gameStarted' class="btn btn-success" @click="toggleGame">Start Game</div>
                 <div v-if='gameStarted' class="btn btn-danger" @click="toggleGame">Stop Game</div>
               </div>
-                <div class="row mt-4">
-                    <h3>LEADERBOARD</h3>
-                </div>
-                <div class="row row-cols-5">
-                    <div class="col mb-2" v-for="(player, k) in players" :key="k">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">{{player.name}}</h5>
-                                <p class="display-4">{{player.score}}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              <div style="height: 102vh; padding-top: 2rem;">
+                <leaderboard :info="players" :user="{}" />
+              </div>
             </div>
         </div>
       </div>
@@ -36,12 +26,14 @@
 
 <script>
 import Title from '@/components/Title'
+import Leaderboard from '@/components/Leaderboard'
 import {realtime} from '../firebase.config.js'
 
 export default {
   name: 'game',
   components: {
-    Title
+    Title,
+    Leaderboard
   },
   data() {
     return {
