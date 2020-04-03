@@ -1,5 +1,5 @@
 <template>
-    <div class="container m-2 p-2 border-bottom">
+    <div class="container mb-2 p-2 border-bottom">
         <div class="row align-items-end">
             <div class="col-auto">
                 <span class="mb-0 display-4">Mathex Online</span>
