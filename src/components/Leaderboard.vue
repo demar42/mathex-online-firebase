@@ -71,22 +71,26 @@ export default {
         determineStyle(val) {
             let style = ''
             let rank = this.rank(val)
-            style += `top: ${this.RemPerRow * (rank - 1)}rem;`
+            style += `top: ${this.RemPerRow * (rank - 1)}rem; z-index: ${rank}`
             // If this is the data of the user, highlight it green
             if (this.user['.key'] === val['.key']) {
                 style += 'color: var(--green);'
                 console.log()
             }
+            // set gold, silver, bronze or white as background color
             switch (rank) {
                 case 1:
                     style += 'background-color: #F4C127;'
-                    break;
+                    break
                 case 2:
                     style += 'background-color: #BDC1BE;'
-                    break;
+                    break
                 case 3:
                     style += 'background-color: #DB9B41;'
-                    break;
+                    break
+                default:
+                    style += 'background-color: white;'
+                    break
             }
             return style
         }
