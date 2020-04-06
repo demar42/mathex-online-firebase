@@ -2,16 +2,24 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Index from '../views/Index.vue'
 
+import {auth} from '../firebase.config'
+
 Vue.use(VueRouter)
 
 // VERY BASIC ADMIN PAGE PROTECTION
 function guard(a, b, next) {
-  if (Vue.cookie.get('adminAllowed')|| prompt('Please enter the password to view this page:') === 'admin1234') {
-    next()
-    Vue.cookie.set('adminAllowed', true)
-  } else {
-    next('/')
-  }
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      next()
+    } else {
+      let password = prompt('Please enter your password to view this page')
+      auth.signInWithEmailAndPassword('admin@mathex-online.web.app', password).catch(() => {
+        // Wrong password
+        next('/')
+        alert("Wrong Password!")
+      })
+    }
+  })
 }
 
 const routes = [
