@@ -204,7 +204,8 @@ async function createGame(quiz, vue) {
   await realtime.ref('/games/' + newID).set({
     questions: quiz.questions,
     users: [],
-    created: Math.round((new Date).getTime() / 1000) // mark creation time
+    created: Math.round((new Date).getTime() / 1000), // mark creation time
+    logs: []
   })
 
   // open link

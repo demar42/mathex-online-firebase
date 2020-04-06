@@ -8,7 +8,7 @@
                 <!-- Questions column -->
                 <div class="col col-lg-8 px-5">
                     <div class="row justify-content-center">
-                        <div class="col-" v-if="finished">
+                        <div class="col" v-if="finished">
                             <span class="text-success">
                                 <span class="display-4">Congratulations!</span> <br>
                                 You have completed all the questions!
@@ -66,6 +66,7 @@ export default {
             questions: [],
             user: null,
             scores: [],
+            startedQuestionTime: 0,
             typedAnswer: '',
             submitting: false,
             showResult: false,
@@ -89,12 +90,29 @@ export default {
                     if (this.result) {
                         // it was correct, so go to the next question
                         // check to make sure we haven't reached the end
+                        let log = {}
                         if (this.user.cur_question + 1 === this.questions.length) {
                             this.finished = true
+                        } else {
+                            // prep the log for the next question
+                            realtime.refFromURL(`${this.gameinfo.logRef}/${this.user.cur_question + 1}`).set({
+                                a: 0
+                            })
                         }
+                        // Write the log
+                        realtime.refFromURL(`${this.gameinfo.logRef}/${this.user.cur_question}`).update({
+                            r: 'c',
+                            t: Math.round(((new Date).getTime() - this.startedQuestionTime)/1000)
+                        })
                         realtime.refFromURL(this.gameinfo.userRef).update({
                             score: this.user.score + 5,
                             cur_question: this.user.cur_question + 1,
+                        })
+                    } else {
+                        // got it wrong, update log
+                        realtime.refFromURL(`${this.gameinfo.logRef}/${this.user.cur_question}`).update({
+                            r: 'c',
+                            t: Math.round(((new Date).getTime() - this.startedQuestionTime)/1000)
                         })
                     }
                 }, 1000)
@@ -131,6 +149,13 @@ export default {
                 vue.finished = vue.user.cur_question >= vue.questions.length
                 vue.dataReady = true
             })
+        },
+        started: {
+            handler: function(val) {
+                // when the game starts, start the timer
+                if (val['.value']) this.startedQuestionTime = (new Date).getTime()
+            },
+            immediate: true
         }
     },
     mounted() {

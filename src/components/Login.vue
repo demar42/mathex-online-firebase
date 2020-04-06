@@ -39,15 +39,24 @@ export default {
             }
         },
         submitUsername: async function() {
-            let ref = realtime.ref(`/games/${this.pin}/players`)
+            let playersRef = realtime.ref(`/games/${this.pin}/players`)
             // init user
-            let newUserRef = ref.push()
-            newUserRef.set({
-                name: this.username,
-                score: 0,
-                cur_question: 0
-            }).then(
-                this.$emit('data', {pin: this.pin, userRef: newUserRef})
+            let newUserRef = playersRef.push()
+            let logRefRoot = realtime.ref(`/games/${this.pin}/logs/${newUserRef.key}`)
+            let logRef = logRefRoot.child('log')
+            // Set the initial values. Wait for them all
+            Promise.all([
+                newUserRef.set({
+                    name: this.username,
+                    score: 0,
+                    cur_question: 0
+                }),
+                logRefRoot.set({
+                    name: this.username,
+                    log: []
+                })
+            ]).then(
+                this.$emit('data', {pin: this.pin, userRef: newUserRef, logRef: logRef})
             )
         }
     }
