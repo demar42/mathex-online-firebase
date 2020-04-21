@@ -11,7 +11,7 @@
                     <div class="col-3 pl-1 t-header text-right">Score</div>
                 </div>
                 <div class="row flex-grow-1">
-                    <div class="col h-100" style="position: relative; overflow: auto" id="l-scroll">
+                    <div class="col" style="position: relative; overflow: auto" id="l-scroll">
                         <!-- Create a row for every piece of data. Use rank() to determine rank -->
                         <div v-for="score in this.info" :key="score['.key']" :style="determineStyle(score)"
                             class="row t-row">
